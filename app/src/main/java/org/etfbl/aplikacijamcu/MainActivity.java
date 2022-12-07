@@ -20,6 +20,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
@@ -42,6 +43,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class MainActivity extends AppCompatActivity {
     private BluetoothAdapter adapter = null;
     private String adresa = "11:22:33:44:55:66";
+    String textData ="0";
     private static final ParcelUuid serviceUid= ParcelUuid.fromString("0000feaa-0000-1000-8000-00805f9b34fb");
     private BluetoothDevice uredjaj;
     private ActivityMainBinding binding;
@@ -65,28 +67,44 @@ public class MainActivity extends AppCompatActivity {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             data = result.getScanRecord().getServiceData(serviceUid);
+
+
+
             if(data!=null) {
 
                 StringBuilder sb = new StringBuilder();
                 for (byte b : data) {
-                    sb.append(String.format("%02X ", b));
+                    sb.append(String.format("%02X", b));
                 }
+
+
                 String textData=sb.toString();
                 int index=textData.indexOf("202020");
+
                 String values=textData.substring(index+6,index+12);
 
                 char first = (char) Integer.decode("0x" + values.substring(0,2)).intValue();
                 char second = (char) Integer.decode("0x" + values.substring(2,4)).intValue();
                 char third = (char) Integer.decode("0x" + values.substring(4,6)).intValue();
 
-                if(first > 47 && first <58)
+                if(first > 47 && first <58) {
                     textData = "" + first;
-                if(second > 47 && second < 58)
+                }
+                if(second > 47 && second < 58) {
                     textData = textData + second;
-                if(third > 47 && third < 58)
+                }
+                if(third > 47 && third < 58) {
                     textData = textData + third;
+                }
+
+
+                textData = ""+first+second+third;
                 binding.otkucaji.setText(textData);
+                //Log.i("informacije", textData);
             }
+
+
+
 
             if(binding.povezi.isEnabled())
                 binding.povezi.setEnabled(false);
@@ -108,6 +126,9 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void povezi(View view) {
+
+
+
         BluetoothManager bluetoothManager = getSystemService(BluetoothManager.class);
         adapter = bluetoothManager.getAdapter();
         if (adapter == null) {
@@ -129,8 +150,9 @@ public class MainActivity extends AppCompatActivity {
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
 
-       scanner = adapter.getBluetoothLeScanner();
-       scanner.startScan(filters,settings,callback);
+        scanner = adapter.getBluetoothLeScanner();
+        scanner.startScan(filters,settings,callback);
+
 
 
 
